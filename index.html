@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JSON to TypeScript</title>
+<meta name="description" content="Paste a JSON value, get TypeScript interfaces. Browser-only, no dependencies, no upload.">
+<meta name="ai.description" content="Single-file HTML tool that takes a JSON value as input and generates TypeScript interface declarations. Handles nested objects, arrays of mixed types, optional vs required fields when given an array of samples, and union types for heterogeneous arrays. No frameworks, no dependencies.">
+<style>
+:root{--bg:#e8e4ed;--surface:#fff;--surface-2:#f3f0f7;--ink:#1a142a;--ink-soft:#5a4f6e;--rule:#d0c8db;--rule-strong:#1a142a;--accent:#6d28d9;--accent-soft:#ede4fb;--mono:ui-monospace,"JetBrains Mono","SF Mono",Menlo,Consolas,monospace;--sans:"Inter",ui-sans-serif,system-ui,-apple-system,sans-serif;--ok:#1f6f43;--ok-soft:#e3f2ea;--err:#b3261e;--err-soft:#fbe9e7}
+[data-theme="dark"]{--bg:#15121d;--surface:#1f1a2c;--surface-2:#1a1626;--ink:#ece5f7;--ink-soft:#a89bbf;--rule:#2e2542;--rule-strong:#ece5f7;--accent:#a78bfa;--accent-soft:#2e2148;--ok:#7fc99c;--ok-soft:#1f3327;--err:#f08585;--err-soft:#3d2222}
+[data-theme="dark"] button.primary, [data-theme="dark"] a.primary { color: var(--bg) !important; }
+[data-theme="dark"] button.primary, [data-theme="dark"] a.primary { border-color: var(--accent) !important; }
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);line-height:1.55;font-size:14px;min-height:100vh}
+.skip-link{position:absolute;left:-9999px;top:0;background:var(--accent);color:#fff;padding:.5rem 1rem;z-index:100;font-weight:600}
+.skip-link:focus{left:1rem;top:1rem}
+.layout{max-width:1200px;margin:0 auto;padding:2rem 1.25rem 4rem}
+header{display:grid;grid-template-columns:1fr auto;gap:1.5rem;align-items:end;padding-bottom:1.25rem;border-bottom:1px solid var(--rule-strong);margin-bottom:1.5rem}
+.brand{font-family:var(--mono);font-size:.6875rem;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:.5rem;font-weight:600}
+h1{font-size:clamp(1.625rem,4vw,2.375rem);font-weight:700;letter-spacing:-.02em;line-height:1.05}
+h1 .accent{color:var(--accent);font-family:var(--mono)}
+.subtitle{margin-top:.5rem;color:var(--ink-soft);font-size:.9375rem;max-width:520px}
+.theme-toggle{background:var(--surface);color:var(--ink);border:1px solid var(--rule-strong);border-radius:3px;padding:.5rem .75rem;font:inherit;font-size:.75rem;font-weight:600;cursor:pointer;text-transform:uppercase;letter-spacing:.06em;display:inline-flex;align-items:center;gap:.4rem;flex-shrink:0}
+.theme-toggle:hover{background:var(--ink);color:var(--bg)}
+.theme-toggle:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.theme-toggle svg{width:14px;height:14px}
+.workspace{display:grid;grid-template-columns:1fr 1fr;gap:1rem;align-items:flex-start}
+@media(max-width:880px){.workspace{grid-template-columns:1fr}}
+.panel{background:var(--surface);border:1px solid var(--rule);border-radius:3px;padding:1rem 1.25rem}
+.panel-head{display:flex;align-items:baseline;gap:.625rem;margin-bottom:.625rem;padding-bottom:.4rem;border-bottom:1px solid var(--rule)}
+.panel-num{font-family:var(--mono);font-size:.6875rem;font-weight:700;color:var(--accent);letter-spacing:.08em}
+.panel-title{font-size:.8125rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+label{display:block;font-family:var(--mono);font-size:.6875rem;font-weight:700;margin-bottom:.3rem;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft)}
+textarea,input[type="text"],select{width:100%;background:var(--bg);color:var(--ink);border:1px solid var(--rule);border-radius:3px;padding:.55rem .7rem;font:inherit;font-family:var(--mono);font-size:.8125rem;line-height:1.5}
+textarea{resize:vertical;min-height:280px}
+textarea:focus,input:focus,select:focus{outline:2px solid var(--accent);outline-offset:-1px;border-color:var(--accent)}
+.options{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:.625rem}
+.options label{font-size:.6875rem;margin-bottom:.2rem}
+.row{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;margin-top:.625rem}
+button.primary,button.secondary{font:inherit;font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;padding:.45rem .85rem;border-radius:3px;cursor:pointer;display:inline-flex;align-items:center;gap:.4rem}
+button.primary{background:var(--accent);color:#fff;border:1px solid var(--accent)}
+button.primary:hover:not(:disabled){filter:brightness(.92)}
+button.secondary{background:var(--surface);color:var(--ink);border:1px solid var(--rule-strong)}
+button.secondary:hover:not(:disabled){background:var(--ink);color:var(--bg)}
+button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.help{margin-top:.4rem;font-size:.75rem;color:var(--ink-soft);line-height:1.55}
+.status{margin-top:.5rem;padding:.4rem .625rem;border-radius:3px;font-size:.75rem;font-family:var(--mono);border:1px solid var(--rule)}
+.status.ok{background:var(--ok-soft);color:var(--ok);border-color:var(--ok)}
+.status.err{background:var(--err-soft);color:var(--err);border-color:var(--err)}
+footer{margin-top:2.5rem;padding-top:1.25rem;border-top:1px solid var(--rule);font-size:.75rem;color:var(--ink-soft);line-height:1.7}
+footer a{color:var(--ink-soft);text-decoration:underline;text-underline-offset:2px}
+footer a:hover{color:var(--accent)}
+@media(max-width:540px){.layout{padding:1.25rem 1rem 3rem}h1{font-size:1.375rem}header{grid-template-columns:1fr}}
+</style>
+</head>
+<body data-theme="light">
+<a href="#main" class="skip-link">Skip to main</a>
+<div class="layout">
+<header>
+<div>
+<div class="brand">JSON // 2 // TS</div>
+<h1>JSON to <span class="accent">TypeScript.</span></h1>
+<p class="subtitle">Paste any JSON. Get strict, named TypeScript interfaces. Handles nested objects, arrays of mixed types, optionals.</p>
+</div>
+<button type="button" class="theme-toggle" id="theme-btn" aria-label="Toggle theme" aria-pressed="false">
+<svg id="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+<circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
+</svg>
+<span id="theme-label">Dark</span>
+</button>
+</header>
+<main id="main">
+<div class="workspace">
+<div class="panel">
+<div class="panel-head"><span class="panel-num">01</span><h2 class="panel-title">JSON input</h2></div>
+<div class="options">
+<div><label for="root-name">Root interface</label><input type="text" id="root-name" value="Root" autocomplete="off" spellcheck="false"></div>
+<div><label for="export-style">Export style</label><select id="export-style"><option value="export">export interface</option><option value="declare">declare interface</option><option value="bare">interface (no export)</option><option value="type">export type</option></select></div>
+</div>
+<label for="json-input">Paste JSON</label>
+<textarea id="json-input" spellcheck="false"></textarea>
+<div class="row"><button type="button" class="secondary" id="example-btn">Load example</button><button type="button" class="secondary" id="clear-btn">Clear</button></div>
+<div id="parse-status" role="status" aria-live="polite"></div>
+</div>
+<div class="panel">
+<div class="panel-head"><span class="panel-num">02</span><h2 class="panel-title">TypeScript output</h2></div>
+<label for="output-area">Generated</label>
+<textarea id="output-area" readonly spellcheck="false" style="min-height:320px"></textarea>
+<div class="row"><button type="button" class="primary" id="copy-btn">Copy</button><button type="button" class="secondary" id="download-btn">Download .ts</button></div>
+<div id="copy-status" role="status" aria-live="polite"></div>
+</div>
+</div>
+</main>
+<footer>
+<p>Source: <a href="https://github.com/0xelitesystem/json-to-typescript" target="_blank" rel="noopener">github.com/0xelitesystem/json-to-typescript</a></p>
+<p>Related: <a href="https://github.com/0xelitesystem/csv-to-anything" target="_blank" rel="noopener">csv-to-anything</a> &middot; <a href="https://github.com/0xelitesystem/regex-tester-with-explainer" target="_blank" rel="noopener">regex-tester-with-explainer</a></p>
+<p>For an array of N samples (e.g. API response examples), the tool merges all samples to detect optional vs required fields. No data leaves your browser.</p>
+</footer>
+</div>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const escapeHtml=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+const EXAMPLE=`{
+  "id": 42,
+  "name": "Acme",
+  "active": true,
+  "tags": ["api", "billing"],
+  "owner": {
+    "id": 7,
+    "email": "owner@example.com",
+    "verified": true
+  },
+  "items": [
+    {"sku": "A-1", "qty": 3},
+    {"sku": "A-2", "qty": 1}
+  ],
+  "meta": null
+}`;
+
+function isPlainObject(v){return v!==null&&typeof v==="object"&&!Array.isArray(v)}
+
+// Walk JSON value, collect interface schemas. Each unique schema gets a name.
+// Returns { rootRef: typeRef, interfaces: [{name, fields:[{key,type,optional}]}, ...] }
+function generate(value,rootName){
+  const interfaces=[];
+  const nameCounter={};
+
+  function pickName(suggested){
+    const base=suggested||"Unnamed";
+    if(!nameCounter[base]){nameCounter[base]=1;return base}
+    nameCounter[base]++;
+    return base+nameCounter[base];
+  }
+
+  function pascal(s){
+    return s.replace(/[^A-Za-z0-9]+(.)/g,(_,c)=>c.toUpperCase()).replace(/^./,c=>c.toUpperCase()).replace(/[^A-Za-z0-9]/g,"");
+  }
+
+  function singularize(s){
+    if(s.endsWith("ies"))return s.slice(0,-3)+"y";
+    if(s.endsWith("ses")||s.endsWith("xes"))return s.slice(0,-2);
+    if(s.endsWith("s")&&!s.endsWith("ss"))return s.slice(0,-1);
+    return s;
+  }
+
+  function visit(val,nameHint){
+    if(val===null)return"null";
+    const t=typeof val;
+    if(t==="string")return"string";
+    if(t==="number")return"number";
+    if(t==="boolean")return"boolean";
+    if(Array.isArray(val))return arrayType(val,nameHint);
+    if(t==="object")return objectType(val,nameHint);
+    return"unknown";
+  }
+
+  function arrayType(arr,nameHint){
+    if(arr.length===0)return"unknown[]";
+    // Merge object-type elements into a single shape
+    const objs=arr.filter(isPlainObject);
+    if(objs.length===arr.length){
+      const merged=mergeObjects(objs);
+      const name=pickName(pascal(singularize(nameHint||"Item")));
+      const iface=buildInterface(name,merged);
+      interfaces.push(iface);
+      return name+"[]";
+    }
+    // Mixed types -> union
+    const types=new Set();
+    for(const v of arr){types.add(visit(v,nameHint))}
+    const sorted=[...types].sort();
+    return sorted.length===1?sorted[0]+"[]":"("+sorted.join(" | ")+")[]";
+  }
+
+  function mergeObjects(objs){
+    // Returns Map<key, {types:Set, optional:bool}>
+    const map=new Map();
+    const allKeys=new Set();
+    for(const o of objs)for(const k of Object.keys(o))allKeys.add(k);
+    for(const k of allKeys){
+      const types=new Set();
+      let presentCount=0;
+      for(const o of objs){
+        if(k in o){presentCount++;types.add(JSON.stringify(o[k]===null?"null":(Array.isArray(o[k])?"array:"+JSON.stringify(o[k].map(x=>typeof x).slice(0,1)):typeof o[k])))}
+      }
+      // We need to call visit on a representative value. Pick the first non-null.
+      let rep=null;
+      for(const o of objs)if(k in o&&o[k]!==null){rep=o[k];break}
+      if(rep===null){
+        // All null
+        map.set(k,{types:new Set(["null"]),optional:presentCount<objs.length,sample:null});
+      }else{
+        // For arrays, merge across all samples
+        const sampleVals=objs.filter(o=>k in o).map(o=>o[k]);
+        let mergedType;
+        if(Array.isArray(rep)){
+          // Concatenate samples for array merging
+          const allArrays=sampleVals.filter(Array.isArray).flat();
+          mergedType=arrayType(allArrays,k);
+          // Did any sample have null for this key?
+          const hasNull=sampleVals.some(v=>v===null);
+          if(hasNull)mergedType=mergedType+" | null";
+        }else if(isPlainObject(rep)){
+          const subObjs=sampleVals.filter(isPlainObject);
+          const subMerged=mergeObjects(subObjs);
+          const name=pickName(pascal(k));
+          interfaces.push(buildInterface(name,subMerged));
+          mergedType=name;
+          const hasNull=sampleVals.some(v=>v===null);
+          if(hasNull)mergedType+=" | null";
+        }else{
+          // Primitive: collect all observed primitive types
+          const tset=new Set();
+          for(const v of sampleVals){
+            if(v===null)tset.add("null");
+            else tset.add(typeof v);
+          }
+          mergedType=[...tset].sort().join(" | ");
+        }
+        map.set(k,{type:mergedType,optional:presentCount<objs.length});
+      }
+    }
+    return map;
+  }
+
+  function objectType(obj,nameHint){
+    const merged=mergeObjects([obj]);
+    const name=pickName(pascal(nameHint||"Object"));
+    interfaces.push(buildInterface(name,merged));
+    return name;
+  }
+
+  function buildInterface(name,fieldMap){
+    const fields=[];
+    for(const[k,v]of fieldMap){
+      const tt=v.type||[...(v.types||["unknown"])].join(" | ");
+      fields.push({key:k,type:tt,optional:!!v.optional});
+    }
+    return{name,fields};
+  }
+
+  let rootType;
+  if(isPlainObject(value)){
+    const merged=mergeObjects([value]);
+    const name=pickName(pascal(rootName));
+    interfaces.push(buildInterface(name,merged));
+    rootType=name;
+  }else if(Array.isArray(value)){
+    rootType=arrayType(value,rootName);
+  }else{
+    rootType=visit(value,rootName);
+  }
+  return{rootType,interfaces};
+}
+
+function emit(rootType,interfaces,style,rootName){
+  const lines=[];
+  const isExportable=style!=="bare";
+  const prefix={"export":"export interface ","declare":"declare interface ","bare":"interface ","type":"export type "}[style];
+
+  // Emit interfaces in reverse order (children before parents) for readability — but TS doesn't require it
+  const seen=new Set();
+  const dedup=interfaces.filter(i=>{if(seen.has(i.name))return false;seen.add(i.name);return true});
+
+  for(const iface of dedup){
+    if(style==="type"){
+      lines.push(`export type ${iface.name} = {`);
+    }else{
+      lines.push(prefix+iface.name+" {");
+    }
+    for(const f of iface.fields){
+      const propName=/^[A-Za-z_$][\w$]*$/.test(f.key)?f.key:`"${f.key.replace(/"/g,'\\"')}"`;
+      const opt=f.optional?"?":"";
+      lines.push(`  ${propName}${opt}: ${f.type};`);
+    }
+    lines.push(style==="type"?"};":"}");
+    lines.push("");
+  }
+
+  // If root is array of unknown or primitive, add a top-level alias
+  if(!dedup.some(i=>i.name===rootType)){
+    if(style==="type"){
+      lines.push(`export type ${rootName} = ${rootType};`);
+    }else if(isExportable){
+      lines.push(`export type ${rootName} = ${rootType};`);
+    }else{
+      lines.push(`type ${rootName} = ${rootType};`);
+    }
+  }
+
+  return lines.join("\n").trimEnd();
+}
+
+function setStatus(el,kind,msg){
+  if(!kind){el.innerHTML="";return}
+  el.innerHTML=`<div class="status ${escapeHtml(kind)}">${escapeHtml(msg)}</div>`;
+}
+
+function convert(){
+  const input=$("json-input").value;
+  const out=$("output-area");
+  if(!input.trim()){out.value="";setStatus($("parse-status"),"","");return}
+  let parsed;
+  try{parsed=JSON.parse(input)}
+  catch(e){setStatus($("parse-status"),"err","Invalid JSON: "+e.message);out.value="";return}
+  setStatus($("parse-status"),"ok","Parsed");
+  const rootName=$("root-name").value.trim()||"Root";
+  const{rootType,interfaces}=generate(parsed,rootName);
+  out.value=emit(rootType,interfaces,$("export-style").value,rootName);
+}
+
+$("json-input").addEventListener("input",convert);
+$("root-name").addEventListener("input",convert);
+$("export-style").addEventListener("change",convert);
+
+$("example-btn").addEventListener("click",()=>{$("json-input").value=EXAMPLE;convert()});
+$("clear-btn").addEventListener("click",()=>{$("json-input").value="";$("output-area").value="";setStatus($("parse-status"),"","")});
+
+$("copy-btn").addEventListener("click",async()=>{
+  const v=$("output-area").value;
+  if(!v){setStatus($("copy-status"),"err","Nothing to copy");return}
+  try{await navigator.clipboard.writeText(v);setStatus($("copy-status"),"ok","Copied")}
+  catch{setStatus($("copy-status"),"err","Clipboard blocked")}
+});
+
+$("download-btn").addEventListener("click",()=>{
+  const v=$("output-area").value;
+  if(!v){setStatus($("copy-status"),"err","Nothing to download");return}
+  const blob=new Blob([v],{type:"text/plain"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");a.href=url;a.download="types.ts";document.body.appendChild(a);a.click();
+  setTimeout(()=>{URL.revokeObjectURL(url);a.remove()},200);
+});
+
+function applyTheme(t){
+  document.body.dataset.theme=t;
+  $("theme-label").textContent=t==="dark"?"Light":"Dark";
+  $("theme-btn").setAttribute("aria-pressed",String(t==="dark"));
+  const icon=$("theme-icon");
+  if(t==="dark")icon.innerHTML='<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>';
+  else icon.innerHTML='<circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>';
+}
+$("theme-btn").addEventListener("click",()=>applyTheme(document.body.dataset.theme==="dark"?"light":"dark"));
+if(window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches)applyTheme("dark");
+
+$("json-input").value=EXAMPLE;
+convert();
+</script>
+</body>
+</html>
