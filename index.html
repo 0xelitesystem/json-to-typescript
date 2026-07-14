@@ -265,7 +265,7 @@ function emit(rootType,interfaces,style,rootName){
   const isExportable=style!=="bare";
   const prefix={"export":"export interface ","declare":"declare interface ","bare":"interface ","type":"export type "}[style];
 
-  // Emit interfaces in reverse order (children before parents) for readability — but TS doesn't require it
+  // Emit interfaces in reverse order (children before parents) for readability, but TS doesn't require it
   const seen=new Set();
   const dedup=interfaces.filter(i=>{if(seen.has(i.name))return false;seen.add(i.name);return true});
 
