@@ -55,6 +55,10 @@ Open `index.html` in any browser, or visit the hosted demo at `https://0xelitesy
 
 For the best output, paste an array of N representative samples instead of one. The merger detects optional fields when a key appears in some samples and not others.
 
+## More
+
+Part of a catalog of single-file browser tools and plain-language references, all MIT licensed and dependency-free: [0xelitesystem.github.io](https://0xelitesystem.github.io/). Built by [elitesystem.ai](https://elitesystem.ai).
+
 ## License
 
 MIT. See [LICENSE](LICENSE).
