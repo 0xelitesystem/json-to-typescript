@@ -4,17 +4,34 @@ Paste any JSON value, get TypeScript interface declarations. Single HTML file. B
 
 **Live demo:** https://0xelitesystem.github.io/json-to-typescript/
 
-## Why
+## Why this exists
 
 You get a sample API response. You need types for it. You either spend 10 minutes writing them by hand and miss a nullable field, or you use a CLI tool, or you paste into one of three online tools that may be tracking your data. This is the smallest, fastest, no-network alternative.
 
-## Use it
+## Use
 
 Open `index.html` in any browser, or visit the hosted demo at `https://0xelitesystem.github.io/json-to-typescript/` once Pages is enabled.
 
 1. Paste JSON in the left panel.
 2. Pick a root interface name and an export style.
 3. Copy or download the generated TypeScript.
+
+## Privacy
+
+Everything runs in your browser. The JSON you paste is converted locally and is never uploaded; the page makes no network requests. Download .ts builds the file in the browser and saves it straight to your machine. The one thing the page stores is your light or dark theme choice, saved in `localStorage` under the key `theme`.
+
+## Run locally
+
+```
+git clone https://github.com/0xelitesystem/json-to-typescript
+cd json-to-typescript
+```
+
+Open `index.html` in any modern browser. Or serve the folder with `python -m http.server` and visit http://localhost:8000.
+
+## Build
+
+No build step. The whole tool is one `index.html` with inline CSS and JavaScript and no dependencies.
 
 ## What it handles
 
